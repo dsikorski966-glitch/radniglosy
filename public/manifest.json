@@ -1,0 +1,9 @@
+{
+  "name": "DSM Glosowanie",
+  "short_name": "DSM",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [{ "src": "/icons/system-glosowania.jpg", "sizes": "512x512", "type": "image/jpeg" }]
+}

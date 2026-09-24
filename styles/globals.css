@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-slate-50 text-slate-900 font-sans; }
+}
+
+@layer components {
+  .btn-za {
+    @apply w-full bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xl font-bold py-6 rounded-2xl shadow-md transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-wstrz {
+    @apply w-full bg-slate-400 hover:bg-slate-500 active:scale-[0.98] text-white text-xl font-bold py-6 rounded-2xl shadow-md transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-przeciw {
+    @apply w-full bg-red-500 hover:bg-red-600 active:scale-[0.98] text-white text-xl font-bold py-6 rounded-2xl shadow-md transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-5;
+  }
+}

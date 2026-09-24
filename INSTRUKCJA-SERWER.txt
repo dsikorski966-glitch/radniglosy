@@ -1,0 +1,59 @@
+DSM GŁOSOWANIE — INSTALACJA NA SERWERZE (Debian + Docker)
+=====================================================
+Ten folder to MINIMUM do zbudowania apki (54 pliki). Nic więcej nie potrzeba.
+NIE kopiuj: node_modules, .next, .env (sekrety) — powstaną same na serwerze.
+
+KROK 1 — wgraj folder na serwer, np. tak:
+  scp -r SERWER-DSM root@192.168.10.158:/root/glosowanie
+albo pendrive — jak Ci wygodnie. Na serwerze wejdź do folderu:
+  cd /root/glosowanie   (tam gdzie leży docker-compose.yml)
+
+KROK 2 — plik .env:
+  cp .env.example .env
+  openssl rand -hex 32        <- skopiuj wynik
+  nano .env
+Uzupełnij MINIMUM:
+  DB_PASSWORD=jakies-mocne-haslo
+  SESSION_SECRET=wklej-wynik-openssl
+  ADMIN_LOGIN=admin
+  ADMIN_PASSWORD=            <- puste = hasło wygeneruje się samo
+  APP_URL=http://192.168.10.158:8095   <- TYLKO do testów w LAN
+Zapis w nano: Ctrl+O, Enter, Ctrl+X.
+
+KROK 3 — wolny port (3000 i 3100 są zwykle zajęte przez CasaOS):
+  ss -tlnp | grep LISTEN
+Wybierz port, którego NIE MA na liście (np. 8095) i w docker-compose.yml
+przy usłudze app ustaw:
+  ports:
+    - "8095:3000"
+
+KROK 4 — start:
+  docker compose up -d --build     <- pierwszy raz trwa kilka minut
+  docker compose logs -f app       <- szukaj [migrate] z loginem i hasłem admina
+
+KROK 5 — test: http://IP-SERWERA:8095  -> ekran logowania.
+Zaloguj się hasłem z logów, dodaj radnych w panelu admina.
+
+PODGLĄD BAZY (Adminer na :8181):
+  docker network connect radaglosyradni_default adminer
+W Adminerze: rodzaj PostgreSQL, serwer db, użytkownik dsm,
+hasło = DB_PASSWORD z .env, baza dsm.
+
+BACKUP (raz dziennie + przed każdą sesją):
+  bash scripts/backup.sh
++ cron: 0 2 * * * cd /root/glosowanie && bash scripts/backup.sh
+Kopie lądują w backups/ — zgrywaj je też poza serwer (pendrive).
+
+INTERNET (Cloudflare Tunnel, później):
+  1. Cloudflare Zero Trust -> Tunnels -> Create (nazwa np. dsm-glosowanie)
+  2. Public Hostname: glosowaniedsm.pl -> HTTP -> app:3000
+  3. Token wklej do .env jako CLOUDFLARE_TOKEN
+  4. docker compose --profile tunnel up -d
+  5. APP_URL w .env zmień na https://glosowaniedsm.pl i zrestartuj apkę.
+
+RESET HASŁA MAILEM (Brevo, opcjonalnie, na końcu):
+  Wygeneruj NOWE klucze w Brevo (stare ze screena są spalone),
+  dopisz do .env: BREVO_API_KEY, EMAIL_FROM, EMAIL_FROM_NAME,
+  APP_URL musi być prawdziwym adresem z tunelu. Restart apki.
+
+W razie błędu wklej wynik: docker compose logs app | tail -20
